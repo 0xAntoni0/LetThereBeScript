@@ -38,7 +38,17 @@ $MinPercent = Read-Host "✉️Enter minimum % of storage. All mailboxes exceedi
 
 # Get mailboxes
 $mailboxes = Get-Mailbox
+$total =$mailboxes.Count
+$counter = 0
+
 $results = foreach ($mb in $mailboxes) {
+    $counter++
+
+    # Show progress bar
+    Write-Progress -Activity "Processing mailboxes..." `
+                   -Status "Proccessing: $($mb.DisplayName)" `
+                   -PercentComplete (($counter / $total) * 100)
+
     $primarySmtp = $mb.PrimarySmtpAddress.ToString()
     $stats = Get-MailboxStatistics -Identity $primarySmtp
     $quotaRaw = (Get-Mailbox -Identity $primarySmtp).ProhibitSendQuota
