@@ -45,8 +45,8 @@ $results = foreach ($mb in $mailboxes) {
     $counter++
 
     # Show progress bar
-    Write-Progress -Activity "Processing mailboxes..." `
-                   -Status "Proccessing: $($mb.DisplayName)" `
+    Write-Progress -Activity "Scanning mailboxes..." `
+                   -Status "Now checking: $($mb.DisplayName)" `
                    -PercentComplete (($counter / $total) * 100)
 
     $primarySmtp = $mb.PrimarySmtpAddress.ToString()
