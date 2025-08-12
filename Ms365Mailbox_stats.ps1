@@ -111,6 +111,10 @@ if ($results.Count -gt 0) {
 
     $fullHtml | Out-File -FilePath $exportPath -Encoding UTF8
     Write-Host "✅ HTML report generated at: $exportPath"
+    
+    # Open the HTML file in default browser
+    Start-Process $exportPath
+    
 } else {
     Write-Host "⚠️ HTML export skipped — no mailboxes exceeded the specified threshold." -ForegroundColor Yellow
 }
