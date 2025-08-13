@@ -2,7 +2,7 @@
 try {
     if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
         Write-Host "ExchangeOnlineManagement module is not installed. Installing..." -ForegroundColor Green
-        Install-Module -Name ExchangeOnlineManagement -Force -Scope CurrentUser
+        Install-Module -Name ExchangeOnlineManagement
     } else {
         Write-Host "ExchangeOnlineManagement module is already installed."
     }
