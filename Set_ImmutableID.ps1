@@ -50,3 +50,4 @@ try {
 } catch {
     Write-Host "❌ Error al actualizar el ImmutableID. Verifica que el usuario no esté ya sincronizado." -ForegroundColor Red
 }
+
