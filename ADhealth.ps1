@@ -440,29 +440,30 @@ $htmltableheader = "<h3>Domain Controller Health Summary</h3>
                                     <th style=""text-align: center; "">DNS Service</th>
                                     <th style=""text-align: center; "">NTDS Service</th>
                                     <th style=""text-align: center; "">NetLogon Service</th>
-                                    <th style=""text-align: center; "">DCDIAG: Connectivity</th>
-                                    <th style=""text-align: center; "">DCDIAG: Advertising</th>
-                                    <th style=""text-align: center; "">DCDIAG: FrsEvent</th>
-                                    <th style=""text-align: center; "">DCDIAG: DFSREvent</th>
-                                    <th style=""text-align: center; "">DCDIAG: SysVolCheck</th>
-                                    <th style=""text-align: center; "">DCDIAG: KccEvent</th>
-                                    <th style=""text-align: center; "">DCDIAG: FSMO KnowsOfRoleHolders</th>
-                                    <th style=""text-align: center; "">DCDIAG: MachineAccount</th>
-                                    <th style=""text-align: center; "">DCDIAG: NCSecDesc</th>
-                                    <th style=""text-align: center; "">DCDIAG: NetLogons</th>
-                                    <th style=""text-align: center; "">DCDIAG: ObjectsReplicated</th>
-                                    <th style=""text-align: center; "">DCDIAG: Replications</th>
-                                    <th style=""text-align: center; "">DCDIAG: RidManager</th>
-                                    <th style=""text-align: center; "">DCDIAG: Services</th>
-                                    <th style=""text-align: center; "">DCDIAG: SystemLog</th>
-                                    <th style=""text-align: center; "">DCDIAG: VerifyReferences</th>
-                                    <th style=""text-align: center; "">DCDIAG: CheckSDRefDom</th>
-                                    <th style=""text-align: center; "">DCDIAG: CrossRefValidation</th>
-                                    <th style=""text-align: center; "">DCDIAG: LocatorCheck</th>
-                                    <th style=""text-align: center; "">DCDIAG: Intersite</th>
-                                    <th style=""text-align: center; "">DCDIAG: FSMO Check</th>
                                     <th style=""text-align: center; "">Processing Time (seconds)</th>
                                     </tr>"
+
+# Tabla separada para resultados DCDIAG
+$htmlDCDiagTable = "<h3>DCDIAG Test Results</h3><table style='width:100%; border-collapse: collapse;'>
+<tr><th>Controlador</th><th>Test</th><th>Resultado</th></tr>"
+
+foreach ($reportline in $allTestedDomainControllers) {
+    $dcName = $reportline.Server
+    foreach ($property in $reportline.PSObject.Properties) {
+        if ($property.Name -like "DCDIAG:*") {
+            $testName = $property.Name -replace "DCDIAG:\s*", ""
+            $testResult = $property.Value
+            $colorClass = switch ($testResult) {
+                "Passed" { "pass" }
+                "Failed" { "fail" }
+                default { "" }
+            }
+            $htmlDCDiagTable += "<tr><td>$dcName</td><td>$testName</td><td class='$colorClass'>$testResult</td></tr>"
+        }
+    }
+}
+
+$htmlDCDiagTable += "</table><br>"
 
 # Domain Controller Health Report Table
 $serverhealthhtmltable = $serverhealthhtmltable + $htmltableheader
@@ -551,27 +552,7 @@ foreach ($reportline in $allTestedDomainControllers) {
     $htmltablerow += (New-ServerHealthHTMLTableCell "DNS Service")
     $htmltablerow += (New-ServerHealthHTMLTableCell "NTDS Service")
     $htmltablerow += (New-ServerHealthHTMLTableCell "NetLogon Service")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: Connectivity")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: Advertising")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: FrsEvent")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: DFSREvent")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: SysVolCheck")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: KccEvent")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: FSMO KnowsOfRoleHolders")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: MachineAccount")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: NCSecDesc")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: NetLogons")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: ObjectsReplicated")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: Replications")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: RidManager")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: Services")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: SystemLog")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: VerifyReferences")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: CheckSDRefDom")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: CrossRefValidation")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: LocatorCheck")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: Intersite")
-    $htmltablerow += (New-ServerHealthHTMLTableCell "DCDIAG: FSMO Check")
+
 
     $processingTime = $reportline."Processing Time (seconds)"
     $htmltablerow += "<td>$processingTime</td>"
@@ -584,7 +565,7 @@ $htmltail = "* DNS test is performed using Resolve-DnsName. This cmdlet is only 
                                     </body>
                                     </html>"
 
-$htmlreport = $htmlhead + $serverhealthhtmltable + $htmltail
+$htmlreport = $htmlhead + $serverhealthhtmltable + $htmlDCDiagTable + $htmltail
 
 if ($ReportFile) {
     $htmlreport | Out-File $reportFileName -Encoding UTF8
