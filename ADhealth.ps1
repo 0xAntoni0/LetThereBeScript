@@ -569,6 +569,7 @@ $htmlreport = $htmlhead + $serverhealthhtmltable + $htmlDCDiagTable + $htmltail
 
 if ($ReportFile) {
     $htmlreport | Out-File $reportFileName -Encoding UTF8
+    Invoke-Item $reportFileName
 }
 
 if ($SendEmail) {
