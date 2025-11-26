@@ -225,8 +225,8 @@ Function Get-DomainControllerDCDiagTestResults($ComputerName) {
                         $TestName = ($_ -replace ".*Starting test:", "" -replace ".*Iniciando prueba:", "").Trim().Trim(".")
                     }
                     # Detect result (English and Spanish)
-                    "passed test|failed test|superó la prueba|no superó la prueba" {
-                        if ($_ -match "passed test" -or $_ -match "superó la prueba") {
+                    "passed test|failed test|super. la prueba|no super. la prueba" {
+                        if ($_ -match "passed test" -or $_ -match "super. la prueba") {
                             $TestStatus = "Passed"
                         } else {
                             $TestStatus = "Failed"
@@ -501,7 +501,7 @@ foreach ($reportline in $allTestedDomainControllers) {
 
 $serverhealthhtmltable += "</table></div>" # Close responsive DIV
 $htmltail = "<p style='font-size:11px; color:#777; margin-top:20px; border-top:1px solid #eee; padding-top:10px;'>
-* DNS test is performed using Resolve-DnsName (Windows 2012+). Reporte generado automáticamente.</p>
+* DNS test is performed using Resolve-DnsName (Windows 2012+). Auto-generated report.</p>
 </div>
 </body></html>"
 
