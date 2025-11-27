@@ -11,7 +11,7 @@ Param(
 
 # 1. Configuration
 $GitHubUrl = "https://raw.githubusercontent.com/0xAntoni0/LetThereBeScript/refs/heads/main/Ms365Mailbox_stats.ps1"
-$LocalFile = "$env:TEMP\ADhealth.ps1"
+$LocalFile = "$env:TEMP\Ms365Mailbox_stats.ps1"
 
 # 2. Setup Security Protocol (Required for GitHub)
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
