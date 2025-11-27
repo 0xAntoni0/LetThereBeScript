@@ -13,17 +13,17 @@ try {
     exit
 }
 
-# Prompt for user
+<# Prompt for user
 Write-Host "🔑 Enter tenant admin user or exo admin user" -ForegroundColor Green
 $user = Read-Host "➡️"
 if ([string]::IsNullOrWhiteSpace($user)) {
     Write-Error "🚩No valid user was entered."
     exit
 }
-
+#>
 # Connect to Exchange Online using modern authentication
 try {
-    Connect-ExchangeOnline -UserPrincipalName $user -ShowBanner:$false
+    Connect-ExchangeOnline #-UserPrincipalName $user -ShowBanner:$false
 } catch {
     Write-Error "🚩Error connecting to Exchange Online: $_"
     exit
