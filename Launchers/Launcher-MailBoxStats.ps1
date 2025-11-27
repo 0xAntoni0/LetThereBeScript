@@ -1,6 +1,11 @@
 <#
     .SYNOPSIS
-    Launcher script to download and run the latest ADHealth.ps1 from GitHub.
+    Launcher script to download and run the latest script from GitHub securely.
+    
+    .DESCRIPTION
+    Downloads the script content into memory first, then saves it as UTF-8 to avoid
+    encoding issues (like "smart quotes" or special characters breaking).
+    Then executes the local copy passing all arguments.
 #>
 
 [CmdletBinding()]
@@ -13,24 +18,32 @@ Param(
 $GitHubUrl = "https://raw.githubusercontent.com/0xAntoni0/LetThereBeScript/refs/heads/main/Ms365Mailbox_stats.ps1"
 $LocalFile = "$env:TEMP\Ms365Mailbox_stats.ps1"
 
-# 2. Setup Security Protocol (Required for GitHub)
+# 2. Setup Security Protocol (Required for GitHub TLS 1.2)
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 
-# 3. Download the latest version
+# 3. Download the latest version forcing UTF-8
 Write-Host "Downloading latest version from GitHub..." -ForegroundColor Cyan
 try {
-    Invoke-RestMethod -Uri $GitHubUrl -OutFile $LocalFile -ErrorAction Stop
+    # Content downloaded in memory
+    $ScriptContent = Invoke-RestMethod -Uri $GitHubUrl -UseBasicParsing -ErrorAction Stop
+    
+    # Force disk writting using UTF-8
+    [System.IO.File]::WriteAllText($LocalFile, $ScriptContent, [System.Text.Encoding]::UTF8)
 }
 catch {
-    Write-Error "Failed to download script. Check internet connection or URL."
-    Write-Error $_
+    Write-Error "Failed to download script from $GitHubUrl"
+    Write-Error "Error details: $_"
     Exit 1
 }
 
 # 4. Execute the downloaded script
-# We use @args to pass any parameters used on this launcher directly to the downloaded script
-Write-Host "Executing ADHealth check..." -ForegroundColor Green
-& $LocalFile @args
-
-# Optional: Clean up after execution
-# Remove-Item $LocalFile -ErrorAction SilentlyContinue
+if (Test-Path $LocalFile) {
+    Write-Host "Executing script..." -ForegroundColor Green
+    
+    # Run with @args arguments
+    & $LocalFile @args
+}
+else {
+    Write-Error "The script file could not be found at $LocalFile."
+    Exit 1
+}
