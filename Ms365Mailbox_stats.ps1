@@ -1,3 +1,8 @@
+<#
+    .SYNOPSIS
+    Script to export MailBox stats. Define minimum % to fetch mailboxes meeting or exceeding that storage usage.
+#>
+
 # Check and install ExchangeOnlineManagement module if not present
 try {
     if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
@@ -13,19 +18,11 @@ try {
     exit
 }
 
-<# Prompt for user
-Write-Host "🔑 Enter tenant admin user or exo admin user" -ForegroundColor Green
-$user = Read-Host "➡️"
-if ([string]::IsNullOrWhiteSpace($user)) {
-    Write-Error "🚩No valid user was entered."
-    exit
-}
-#>
 # Connect to Exchange Online using modern authentication
 try {
     Connect-ExchangeOnline #-UserPrincipalName $user -ShowBanner:$false
 } catch {
-    Write-Error "🚩Error connecting to Exchange Online: $_"
+    Write-Error "Error connecting to Exchange Online: $_"
     exit
 }
 
@@ -110,11 +107,11 @@ if ($results.Count -gt 0) {
     $fullHtml = $htmlHeader + $tableHtml + $htmlFooter
 
     $fullHtml | Out-File -FilePath $exportPath -Encoding UTF8
-    Write-Host "✅ HTML report generated at: $exportPath"
+    Write-Host "HTML report generated at: $exportPath"
     
     # Open the HTML file in default browser
     Start-Process $exportPath
     
 } else {
-    Write-Host "⚠️ HTML export skipped — no mailboxes exceeded the specified threshold." -ForegroundColor Yellow
+    Write-Host "HTML export skipped — no mailboxes exceeded the specified threshold." -ForegroundColor Yellow
 }
