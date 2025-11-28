@@ -223,6 +223,9 @@ if ($results.Count -gt 0) {
 
     $htmlFooter = @"
     <p style="font-size: 0.8em; color: #666;">Total de buzones reportados: $($results.Count)</p>
+    <p style="font-size: 0.8em; color: #666;">*En rojo se colorean los buzones con el 85% o más de su capacidad ocupada</p>
+    <p style="font-size: 0.8em; color: #666;">**En amarillo se colorean los buzones que se sitúen entre el 75% y el 85% de su capacidad ocupada</p>
+    
 </body>
 </html>
 "@
