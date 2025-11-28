@@ -270,15 +270,15 @@ $htmlhead = "<html><head><meta charset='UTF-8'>
 # ------------------- TABLE 1: INFRASTRUCTURE -------------------
 $tableInfraHead = "<h2 class='section-title'>1. Infraestructura y Estado del Sistema</h2>
 <div class='table-responsive'><table><tr>
-<th title='Nombre del Servidor (Hostname). Es la identidad de la máquina en la red.'>Server</th>
-<th title='Ubicación lógica en AD. Importante para saber si la replicación está optimizada por zonas geográficas.'>Site</th>
-<th title='Versión de Windows Server instalada. Útil para detectar sistemas obsoletos o sin parches.'>OS Version</th>
-<th title='Dirección IP principal. Verifica que coincida con lo esperado en el DNS.'>IPv4</th>
-<th title='Prueba de resolución de nombres. ¿El servidor es capaz de resolver su propia IP a través del DNS?' style='text-align:center'>DNS</th>
-<th title='Prueba de vida (ICMP). ¿El servidor responde o está totalmente desconectado/apagado?' style='text-align:center'>Ping</th>
-<th title='Tiempo encendido sin reinicios. Si es muy alto, faltan parches; si es muy bajo, se reinició hace poco.' style='text-align:center'>Uptime (H)</th>
-<th title='Espacio libre en disco C:. Si llega a 0, el servidor dejará de funcionar y la base de datos AD se detendrá.' style='text-align:center'>Free Space GB</th>
-<th title='Diferencia de hora con quien ejecuta el script. Si varía más de 5 min, la autenticación (Kerberos) fallará.' style='text-align:center'>Time Offset</th>
+<th title='Nombre del Servidor (Hostname). Es la identidad de la maquina en la red.'>Server</th>
+<th title='Ubicacion logica en AD. Importante para saber si la replicacion esta optimizada por zonas geograficas.'>Site</th>
+<th title='Version de Windows Server instalada. util para detectar sistemas obsoletos o sin parches.'>OS Version</th>
+<th title='Direccion IP principal. Verifica que coincida con lo esperado en el DNS.'>IPv4</th>
+<th title='Prueba de resolucion de nombres. ¿El servidor es capaz de resolver su propia IP a traves del DNS?' style='text-align:center'>DNS</th>
+<th title='Prueba de vida (ICMP). ¿El servidor responde o esta totalmente desconectado/apagado?' style='text-align:center'>Ping</th>
+<th title='Tiempo encendido sin reinicios. Si es muy alto, faltan parches; si es muy bajo, se reinicio hace poco.' style='text-align:center'>Uptime (H)</th>
+<th title='Espacio libre en disco C:. Si llega a 0, el servidor dejara de funcionar y la base de datos AD se detendra.' style='text-align:center'>Free Space GB</th>
+<th title='Diferencia de hora con quien ejecuta el script. Si varia mas de 5 min, la autenticacion (Kerberos) fallara.' style='text-align:center'>Time Offset</th>
 </tr>"
 
 $tableInfraRows = ""
@@ -316,11 +316,11 @@ $tableInfra = $tableInfraHead + $tableInfraRows + "</table></div>"
 $tableSvcHead = "<h2 class='section-title'>2. Estado de Servicios y Roles</h2>
 <div class='table-responsive'><table><tr>
 <th title='Nombre del Servidor'>Server</th>
-<th title='Servicio DNS Server. Si se detiene, nadie podrá encontrar recursos en la red.' style='text-align:center'>Svc DNS</th>
-<th title='Servicio de Dominio (NTDS). Es el corazón de Active Directory; si para, no hay logins.' style='text-align:center'>Svc NTDS</th>
-<th title='Servicio NetLogon. Mantiene el canal seguro y procesa las peticiones de inicio de sesión.' style='text-align:center'>Svc NetLogon</th>
+<th title='Servicio DNS Server. Si se detiene, nadie podra encontrar recursos en la red.' style='text-align:center'>Svc DNS</th>
+<th title='Servicio de Dominio (NTDS). Es el corazon de Active Directory; si para, no hay logins.' style='text-align:center'>Svc NTDS</th>
+<th title='Servicio NetLogon. Mantiene el canal seguro y procesa las peticiones de inicio de sesion.' style='text-align:center'>Svc NetLogon</th>
 <th title='Servicio de Certificados. Si se detiene, no se pueden emitir ni renovar certificados.' style='text-align:center'>ADCS Svc</th>
-<th title='Cuenta atrás para el certificado que caduca primero. ¡Evita que venza o los servicios seguros dejarán de funcionar!' style='text-align:center'>ADCS Cert (Days)</th>
+<th title='Cuenta atras para el certificado que caduca primero. ¡Evita que venza o los servicios seguros dejaran de funcionar!' style='text-align:center'>ADCS Cert (Days)</th>
 </tr>"
 
 $tableSvcRows = ""
@@ -329,12 +329,12 @@ foreach ($reportline in $allTestedDomainControllers) {
     
     foreach($svc in @("DNS Service", "NTDS Service", "NetLogon Service")){
         $v = $reportline.$svc
-        if($v -eq "Success") { $row += "<td class='pass'>En Ejecución</td>" } else { $row += "<td class='fail'>Fallo</td>" }
+        if($v -eq "Success") { $row += "<td class='pass'>Funcionando</td>" } else { $row += "<td class='fail'>Fallo</td>" }
     }
 
     if ($reportline."ADCS Installed") {
         $adcs = $reportline."ADCS Service"
-        if($adcs -eq "Running") { $row += "<td class='pass'>En Ejecución</td>" } 
+        if($adcs -eq "Running") { $row += "<td class='pass'>Funcionando</td>" } 
         else { $row += "<td class='fail'>$adcs</td>" }
 
         $days = $reportline."ADCS Cert Days"
@@ -354,26 +354,26 @@ $tableSvc = $tableSvcHead + $tableSvcRows + "</table></div>"
 
 # Dictionary for DCDIAG explanations
 $DCDiagHelp = @{
-    "Connectivity"       = "Comprobación básica. Verifica que el servidor tiene DNS registrado y responde a llamadas LDAP y RPC."
-    "Advertising"        = "Verifica si el servidor se está anunciando a la red como un Controlador de Dominio válido."
-    "FrsEvent"           = "Busca errores graves en el registro de eventos del servicio de replicación de archivos (FRS)."
-    "DFSREvent"          = "Busca errores en la replicación moderna (DFSR). Si falla, la carpeta SYSVOL podría no estar sincronizada."
-    "SysVolCheck"        = "Confirma que la carpeta SYSVOL (donde están las GPOs y scripts) está compartida y accesible."
-    "KccEvent"           = "Revisa el 'Arquitecto' de la red (KCC). Si falla, el mapa de replicación entre servidores no se está calculando bien."
-    "KnowsOfRoleHolders" = "¿Sabe este servidor quiénes son los 'Jefes' (Maestros FSMO) del dominio?"
-    "MachineAccount"     = "Comprueba que la cuenta de máquina del propio servidor es válida y segura."
+    "Connectivity"       = "Comprobacion basica. Verifica que el servidor tiene DNS registrado y responde a llamadas LDAP y RPC."
+    "Advertising"        = "Verifica si el servidor se esta anunciando a la red como un Controlador de Dominio valido."
+    "FrsEvent"           = "Busca errores graves en el registro de eventos del servicio de replicacion de archivos (FRS)."
+    "DFSREvent"          = "Busca errores en la replicacion moderna (DFSR). Si falla, la carpeta SYSVOL podria no estar sincronizada."
+    "SysVolCheck"        = "Confirma que la carpeta SYSVOL (donde estan las GPOs y scripts) esta compartida y accesible."
+    "KccEvent"           = "Revisa el Arquitecto de la red (KCC). Si falla, el mapa de replicacion entre servidores no se esta calculando bien."
+    "KnowsOfRoleHolders" = "¿Sabe este servidor quienes son los Jefes (Maestros FSMO) del dominio?"
+    "MachineAccount"     = "Comprueba que la cuenta de maquina del propio servidor es valida y segura."
     "NCSecDesc"          = "Verifica los permisos de seguridad en los objetos principales del Directorio Activo."
-    "NetLogons"          = "Asegura que los permisos de inicio de sesión y replicación son correctos."
-    "ObjectsReplicated"  = "Verifica que ciertos objetos críticos y cuentas del sistema se han replicado correctamente."
-    "Replications"       = "La prueba más importante. Comprueba si la replicación con otros servidores ha ocurrido sin errores recientemente."
-    "RidManager"         = "Verifica la comunicación con el maestro RID (necesario para crear nuevos objetos/usuarios)."
-    "Services"           = "Comprueba que los servicios críticos (RPC, DNS, KDC, etc.) están encendidos."
-    "SystemLog"          = "Analiza el visor de eventos en busca de errores críticos del sistema en los últimos 60 minutos."
-    "VerifyReferences"   = "Comprueba que los objetos críticos del sistema tienen referencias correctas entre sí."
+    "NetLogons"          = "Asegura que los permisos de inicio de sesion y replicacion son correctos."
+    "ObjectsReplicated"  = "Verifica que ciertos objetos criticos y cuentas del sistema se han replicado correctamente."
+    "Replications"       = "La prueba mas importante. Comprueba si la replicacion con otros servidores ha ocurrido sin errores recientemente."
+    "RidManager"         = "Verifica la comunicacion con el maestro RID (necesario para crear nuevos objetos/usuarios)."
+    "Services"           = "Comprueba que los servicios criticos (RPC, DNS, KDC, etc.) estan encendidos."
+    "SystemLog"          = "Analiza el visor de eventos en busca de errores criticos del sistema en los ultimos 60 minutos."
+    "VerifyReferences"   = "Comprueba que los objetos criticos del sistema tienen referencias correctas entre si."
     "CheckSDRefDom"      = "Verifica descriptores de seguridad internos del dominio."
     "CrossRefValidation" = "Valida que las referencias cruzadas entre dominios y sitios son coherentes."
     "LocatorCheck"       = "Verifica que este DC puede ser encontrado por clientes y otros servidores."
-    "Intersite"          = "Comprueba la replicación entre diferentes sitios geográficos (si existen)."
+    "Intersite"          = "Comprueba la replicacion entre diferentes sitios geograficos (si existen)."
     "FSMOCheck"          = "Comprueba que puede contactar con los servidores que tienen roles FSMO."
 }
 
@@ -389,7 +389,7 @@ foreach ($reportline in $allTestedDomainControllers) {
             
             # Lookup tooltip logic
             $tip = $DCDiagHelp[$testName]
-            if (-not $tip) { $tip = "Prueba estándar de diagnóstico de directorio activo ($testName)." }
+            if (-not $tip) { $tip = "Prueba estandar de diagnostico de directorio activo ($testName)." }
 
             if ([string]::IsNullOrWhiteSpace($testResult)) { $displayResult = "Sin Datos"; $colorClass = "fail" }
             else {
@@ -408,7 +408,7 @@ foreach ($reportline in $allTestedDomainControllers) {
 }
 
 $htmltail = "<p style='font-size:11px; color:#777; margin-top:20px; border-top:1px solid #eee; padding-top:10px;'>
-* Pasa el ratón por encima de los títulos de las tablas y los nombres de las pruebas DCDIAG para obtener ayuda.</p></div></body></html>"
+* Pasa el raton por encima de los titulos de las tablas y los nombres de las pruebas DCDIAG para obtener ayuda.</p></div></body></html>"
 
 $htmlreport = $htmlhead + $tableInfra + $tableSvc + $htmlDCDiagTable + $htmltail
 
