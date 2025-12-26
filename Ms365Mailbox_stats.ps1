@@ -59,22 +59,36 @@ function Get-ExSizeGB {
 }
 # -------------------------------------------
 
-$timestamp = Get-Date -Format "yyyyMMdd_HHmm"
+# --- PATH AND FOLDER MANAGEMENT ---
 
-# Define base path and date-specific folder (C:\Scripts\yyyy-MM-dd)
+# Get current date
+$currentDate = Get-Date
+$timestamp = $currentDate.ToString("yyyyMMdd_HHmm")
+$folderDate = $currentDate.ToString("yyyy-MM-dd")
+
+# Define base path and target folder with date
 $basePath = "C:\Scripts\Reportes"
-$dateFolderName = $now.ToString("yyyy-MM-dd")
-$targetFolder = Join-Path -Path $basePath -ChildPath $dateFolderName
+$targetFolder = Join-Path -Path $basePath -ChildPath $folderDate
 
-# Create the full directory structure if it doesn't exist
+# Check if the full path exists; if not, create it (including parent folders if missing)
 if (-not (Test-Path -Path $targetFolder)) {
-    Write-Host "Creating folder: $targetFolder" -ForegroundColor Cyan
-    New-Item -ItemType Directory -Path $targetFolder -Force | Out-Null
+    try {
+        Write-Host "Creating folder structure: $targetFolder" -ForegroundColor Cyan
+        New-Item -ItemType Directory -Path $targetFolder -Force | Out-Null
+    }
+    catch {
+        Write-Error "Could not create folder $targetFolder. Please check permissions."
+        Exit
+    }
 } else {
     Write-Host "Using existing folder: $targetFolder" -ForegroundColor Cyan
 }
 
-$exportPath = $basePath + "\Exchange_Mailbox_Stats_$timestamp.html"
+# Define final file path INSIDE the date folder
+$fileName = "Exchange_Mailbox_Stats_$timestamp.html"
+$exportPath = Join-Path -Path $targetFolder -ChildPath $fileName
+
+# -----------------------------------------------
 
 $MinPercent = Read-Host "✉️ Enter minimum % of storage. All mailboxes exceeding this will be returned"
 
@@ -197,8 +211,7 @@ if ($results.Count -gt 0) {
             <tr>
                 <th>Nombre</th>
                 <th>Correo</th>
-                <th>Alias</th> <!-- New Column -->
-                <th>Tipo</th>
+                <th>Alias</th> <th>Tipo</th>
                 <th>Tamaño (GB)</th>
                 <th>Cuota (GB)</th>
                 <th>Uso (%)</th>
