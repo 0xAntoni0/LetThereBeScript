@@ -191,7 +191,7 @@ Function Get-DomainControllerOSDriveFreeSpaceGB ($ComputerName) {
 # ---------------------------------------------------------------------------
 
 # Define base path and date-specific folder (C:\Scripts\yyyy-MM-dd)
-$basePath = "C:\Scripts"
+$basePath = "C:\Scripts\Reportes"
 $dateFolderName = $now.ToString("yyyy-MM-dd")
 $targetFolder = Join-Path -Path $basePath -ChildPath $dateFolderName
 
