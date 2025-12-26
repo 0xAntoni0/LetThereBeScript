@@ -8,7 +8,7 @@
     - Services: DNS, NTDS, NetLogon status.
     - ADCS: Certificate Authority service status and Certificate expiration monitoring.
     - DCDIAG: Detailed analysis with tooltips explaining each test.
-    
+     
     The output is a categorized, localized (Spanish) HTML report for easy reading.
 
     .OUTPUTS
@@ -189,24 +189,18 @@ Function Get-DomainControllerOSDriveFreeSpaceGB ($ComputerName) {
 # ---------------------------------------------------------------------------
 # MAIN EXECUTION LOOP
 # ---------------------------------------------------------------------------
-if (!($DomainName)) {
-    Write-Host "No domain specified, using all domains in forest" -ForegroundColor Yellow
-    $allDomains = Get-AllDomains
-    $reportFileName = 'forest_health_report_' + (Get-ADForest).name + '_' + $reportFileNameTime + '.html'
-} else {
-    Write-Host "Domain name specified on cmdline" -ForegroundColor Cyan
-    $allDomains = $DomainName
-    $reportFileName = 'dc_health_report_' + $DomainName + '_' + $reportFileNameTime + '.html'
-}
 
-# Define base path and date-specific folder (C:\Scripts\DD-MM-YYYY)
+# Define base path and date-specific folder (C:\Scripts\YYYY-MM-DD)
 $basePath = "C:\Scripts"
-$dateFolderName = $now.ToString("dd-MM-yyyy")
+$dateFolderName = $now.ToString("yyyy-MM-dd")
 $targetFolder = Join-Path -Path $basePath -ChildPath $dateFolderName
 
 # Create the full directory structure if it doesn't exist
 if (-not (Test-Path -Path $targetFolder)) {
+    Write-Host "Creating folder: $targetFolder" -ForegroundColor Cyan
     New-Item -ItemType Directory -Path $targetFolder -Force | Out-Null
+} else {
+    Write-Host "Using existing folder: $targetFolder" -ForegroundColor Cyan
 }
 
 # Define filename based on input parameters
@@ -222,8 +216,6 @@ if (!($DomainName)) {
 
 # Construct the full output path
 $reportFileName = Join-Path -Path $targetFolder -ChildPath $reportNameOnly
-
-foreach ($domain in $allDomains) {
 
 foreach ($domain in $allDomains) {
     Write-Host "Testing domain" $domain -ForegroundColor Green
@@ -438,6 +430,7 @@ $htmltail = "<p style='font-size:11px; color:#777; margin-top:20px; border-top:1
 $htmlreport = $htmlhead + $tableInfra + $tableSvc + $htmlDCDiagTable + $htmltail
 
 if ($ReportFile) {
+    Write-Host "Guardando informe en: $reportFileName" -ForegroundColor Cyan
     $htmlreport | Out-File $reportFileName -Encoding UTF8
     Invoke-Item $reportFileName
 }
