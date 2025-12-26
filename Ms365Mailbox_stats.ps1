@@ -60,7 +60,21 @@ function Get-ExSizeGB {
 # -------------------------------------------
 
 $timestamp = Get-Date -Format "yyyyMMdd_HHmm"
-$exportPath = [Environment]::GetFolderPath("MyDocuments") + "\Exchange_Mailbox_Stats_$timestamp.html"
+
+# Define base path and date-specific folder (C:\Scripts\yyyy-MM-dd)
+$basePath = "C:\Scripts\Reportes"
+$dateFolderName = $now.ToString("yyyy-MM-dd")
+$targetFolder = Join-Path -Path $basePath -ChildPath $dateFolderName
+
+# Create the full directory structure if it doesn't exist
+if (-not (Test-Path -Path $targetFolder)) {
+    Write-Host "Creating folder: $targetFolder" -ForegroundColor Cyan
+    New-Item -ItemType Directory -Path $targetFolder -Force | Out-Null
+} else {
+    Write-Host "Using existing folder: $targetFolder" -ForegroundColor Cyan
+}
+
+$exportPath = $basePath + "\Exchange_Mailbox_Stats_$timestamp.html"
 
 $MinPercent = Read-Host "✉️ Enter minimum % of storage. All mailboxes exceeding this will be returned"
 
