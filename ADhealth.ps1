@@ -189,7 +189,7 @@ Function Get-DomainControllerOSDriveFreeSpaceGB ($ComputerName) {
 # ---------------------------------------------------------------------------
 # MAIN EXECUTION LOOP
 # ---------------------------------------------------------------------------
-
+<#
 if (!($DomainName)) {
     Write-Host "No domain specified, using all domains in forest" -ForegroundColor Yellow
     $allDomains = Get-AllDomains
@@ -199,6 +199,30 @@ if (!($DomainName)) {
     $allDomains = $DomainName
     $reportFileName = 'dc_health_report_' + $DomainName + '_' + $reportFileNameTime + '.html'
 }
+#>
+
+# Get User Documents path (handles OneDrive/Redirection automatically)
+$userDocsPath = [Environment]::GetFolderPath("MyDocuments")
+$targetFolder = Join-Path -Path $userDocsPath -ChildPath "Informes ADhealth"
+
+# Check if folder exists, create if missing
+if (-not (Test-Path -Path $targetFolder)) {
+    New-Item -ItemType Directory -Path $targetFolder -Force | Out-Null
+}
+
+# Define filename based on input parameters
+if (!($DomainName)) {
+    Write-Host "No domain specified, using all domains in forest" -ForegroundColor Yellow
+    $allDomains = Get-AllDomains
+    $reportNameOnly = 'forest_health_report_' + (Get-ADForest).name + '_' + $reportFileNameTime + '.html'
+} else {
+    Write-Host "Domain name specified on cmdline" -ForegroundColor Cyan
+    $allDomains = $DomainName
+    $reportNameOnly = 'dc_health_report_' + $DomainName + '_' + $reportFileNameTime + '.html'
+}
+
+# Construct the full output path
+$reportFileName = Join-Path -Path $targetFolder -ChildPath $reportNameOnly
 
 foreach ($domain in $allDomains) {
     Write-Host "Testing domain" $domain -ForegroundColor Green
