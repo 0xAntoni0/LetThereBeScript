@@ -201,11 +201,12 @@ if (!($DomainName)) {
 }
 #>
 
-# Get User Documents path (handles OneDrive/Redirection automatically)
-$userDocsPath = [Environment]::GetFolderPath("MyDocuments")
-$targetFolder = Join-Path -Path $userDocsPath -ChildPath "Informes ADhealth"
+# Define base path and date-specific folder (C:\Scripts\DD-MM-YYYY)
+$basePath = "C:\Scripts"
+$dateFolderName = $now.ToString("dd-MM-yyyy")
+$targetFolder = Join-Path -Path $basePath -ChildPath $dateFolderName
 
-# Check if folder exists, create if missing
+# Create the full directory structure if it doesn't exist
 if (-not (Test-Path -Path $targetFolder)) {
     New-Item -ItemType Directory -Path $targetFolder -Force | Out-Null
 }
@@ -223,6 +224,8 @@ if (!($DomainName)) {
 
 # Construct the full output path
 $reportFileName = Join-Path -Path $targetFolder -ChildPath $reportNameOnly
+
+foreach ($domain in $allDomains) {
 
 foreach ($domain in $allDomains) {
     Write-Host "Testing domain" $domain -ForegroundColor Green
