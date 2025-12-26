@@ -189,7 +189,6 @@ Function Get-DomainControllerOSDriveFreeSpaceGB ($ComputerName) {
 # ---------------------------------------------------------------------------
 # MAIN EXECUTION LOOP
 # ---------------------------------------------------------------------------
-<#
 if (!($DomainName)) {
     Write-Host "No domain specified, using all domains in forest" -ForegroundColor Yellow
     $allDomains = Get-AllDomains
@@ -199,7 +198,6 @@ if (!($DomainName)) {
     $allDomains = $DomainName
     $reportFileName = 'dc_health_report_' + $DomainName + '_' + $reportFileNameTime + '.html'
 }
-#>
 
 # Define base path and date-specific folder (C:\Scripts\DD-MM-YYYY)
 $basePath = "C:\Scripts"
