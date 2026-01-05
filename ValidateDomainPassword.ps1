@@ -1,5 +1,9 @@
-# .SYNOPSIS
-# Script to validate user AD credentials 
+<#
+.SYNOPSIS
+  Script para validar las contraseñas de los usuarios de dominio.
+.DESCRIPTION
+  Obtain with "Get-credential" user and password to validate if the password is correct or not.
+#> 
  
  # Load the required .NET assembly
 Add-Type -AssemblyName System.DirectoryServices.AccountManagement
