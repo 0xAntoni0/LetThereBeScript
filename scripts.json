@@ -2,7 +2,7 @@
   {
     "url_raw": "https://raw.githubusercontent.com/0xAntoni0/LetThereBeScript/main/ADhealth.ps1",
     "filename": "ADhealth.ps1",
-    "description": "Generates a detailed HTML Health Report for Active Directory and ADCS."
+    "description": "Genera un HTML detallado de la salud del controlador de dominio, sus roles y replicación."
   },
   {
     "url_raw": "https://raw.githubusercontent.com/0xAntoni0/LetThereBeScript/main/Cifrado de unidad Bitlocker.ps1",
