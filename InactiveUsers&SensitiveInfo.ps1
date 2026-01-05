@@ -1,130 +1,150 @@
-<#.SYNOPSIS
+<#
+.SYNOPSIS
   Script para enumerar los objetos usuarios con >90 días sin validarse.
-  DESCRIPTION
+.DESCRIPTION
   Using get-Aduser obtain LastLogon properties to validate and report users object with 90 days or more without logon.
 #>
-# Ruta del fichero HTML de salida
-$rutaSalida = "C:\Scripts\AccountsInactive90daysandSensitiveInfoInDescription.html"
 
-# ================================
-#   INFORME 1: CUENTAS INACTIVAS
-# ================================
-$usuariosInactivos = Get-ADUser -Filter * -Properties LastLogonDate |
+# --- CONFIGURATION ---
+# Output HTML file path
+$OutputPath = "C:\Scripts\AccountsInactive90daysandSensitiveInfoInDescription.html"
+
+# --- DATA RETRIEVAL ---
+
+Write-Host "Gathering inactive accounts (90+ days)..." -ForegroundColor Cyan
+# Query 1: Users inactive for more than 90 days
+# We include 'Enabled' to check account status
+$InactiveUsers = Get-ADUser -Filter * -Properties LastLogonDate, Enabled |
     Where-Object {
         $_.LastLogonDate -le (Get-Date).AddDays(-90) -and $_.LastLogonDate -ne $null
     } |
-    Select-Object Name, SamAccountName, LastLogonDate |
+    Select-Object Name, SamAccountName, LastLogonDate, Enabled |
     Sort-Object LastLogonDate
 
-# ================================
-#   INFORME 2: CUENTAS CON PALABRAS SENSIBLES EN DESCRIPCIÓN
-# ================================
-$usuariosDescripcion = Get-ADUser -Filter * -Properties Description, LastLogonDate |
+Write-Host "Gathering accounts with sensitive descriptions..." -ForegroundColor Cyan
+# Query 2: Users with sensitive keywords in Description
+# Regex '(?i)' makes it case-insensitive
+$SensitiveUsers = Get-ADUser -Filter * -Properties Description, LastLogonDate, Enabled |
     Where-Object {
         $_.Description -match "(?i)contraseña|contraseñas|contrasena|contrasenas|credencial|credenciales|password|passwords|pwd|pdw"
     } |
-    Select-Object Name, SamAccountName, Description, LastLogonDate |
+    Select-Object Name, SamAccountName, Description, LastLogonDate, Enabled |
     Sort-Object Name
 
-# ================================
-#   CABECERA HTML + ESTILOS
-# ================================
-$htmlHeader = @"
+# --- HTML GENERATION ---
+
+# Define CSS styles and HTML Header
+$HtmlHeader = @"
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Informe de Active Directory - Cuentas inactivas y con información sensible</title>
+    <title>Active Directory Report - Inactive & Sensitive Accounts</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            color: black;
-            background-color: white;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-bottom: 40px;
-        }
-        th {
-            background-color: #cccccc;
-            color: black;
-            padding: 8px;
-            border: 1px solid #999999;
-            text-align: left;
-        }
-        td {
-            padding: 6px 8px;
-            border: 1px solid #dddddd;
-            color: black;
-        }
-        tr:nth-child(odd) {
-            background-color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #ccffcc;
-        }
-        h2 {
-            margin-top: 40px;
-        }
+        body { font-family: 'Segoe UI', Arial, sans-serif; color: #333; background-color: #f4f4f4; margin: 20px; }
+        h1 { color: #2c3e50; }
+        h2 { color: #2c3e50; margin-top: 40px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        table { border-collapse: collapse; width: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); background-color: white; }
+        th { background-color: #0078D7; color: white; padding: 12px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #ddd; }
+        tr:hover { background-color: #f1f1f1; }
+        .status-disabled { color: #e74c3c; font-weight: bold; } /* Red */
+        .status-active { color: #27ae60; font-weight: bold; }   /* Green */
+        .footer { margin-top: 50px; font-size: 0.8em; color: #777; }
     </style>
 </head>
 <body>
-    <h1>Informe de Active Directory - Cuentas inactivas y con información sensible</h1>
+    <h1>Active Directory Audit Report</h1>
 "@
 
-# ================================
-#   TABLA 1: CUENTAS INACTIVAS
-# ================================
-$htmlInactivos = @"
-    <h2>Cuentas que no han iniciado sesión en 90 días o más</h2>
+# --- TABLE 1: INACTIVE ACCOUNTS ---
+$HtmlTable1 = @"
+    <h2>Accounts inactive for 90 days or more</h2>
     <table>
-        <tr>
-            <th>Nombre</th>
-            <th>SamAccountName</th>
-            <th>Último inicio de sesión</th>
-        </tr>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>SamAccountName</th>
+                <th>Last Logon</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
 "@
 
-foreach ($u in $usuariosInactivos) {
-    $fecha = if ($u.LastLogonDate) { $u.LastLogonDate.ToString("yyyy-MM-dd HH:mm") } else { "" }
-    $htmlInactivos += "<tr><td>$($u.Name)</td><td>$($u.SamAccountName)</td><td>$fecha</td></tr>`r`n"
+# Generate rows for Inactive Users
+$RowsTable1 = foreach ($User in $InactiveUsers) {
+    # Format Date
+    $DateStr = if ($User.LastLogonDate) { $User.LastLogonDate.ToString("yyyy-MM-dd HH:mm") } else { "Never" }
+    
+    # Determine Status Class and Text
+    $StatusClass = if ($User.Enabled) { "status-active" } else { "status-disabled" }
+    $StatusText  = if ($User.Enabled) { "Habilitada" } else { "Deshabilitada" }
+
+    "<tr>
+        <td>$($User.Name)</td>
+        <td>$($User.SamAccountName)</td>
+        <td>$DateStr</td>
+        <td class='$StatusClass'>$StatusText</td>
+    </tr>"
 }
 
-$htmlInactivos += "</table>"
+$HtmlTable1 += ($RowsTable1 -join "`n") + "</tbody></table>"
 
-# ================================
-#   TABLA 2: CUENTAS CON PALABRAS SENSIBLES
-# ================================
-$htmlDescripcion = @"
-    <h2>Cuentas cuyo campo Descripción contiene palabras sensibles</h2>
+# --- TABLE 2: SENSITIVE DESCRIPTIONS ---
+$HtmlTable2 = @"
+    <h2>Accounts with sensitive keywords in Description</h2>
     <table>
-        <tr>
-            <th>Nombre</th>
-            <th>SamAccountName</th>
-            <th>Descripción</th>
-            <th>Último inicio de sesión</th>
-        </tr>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>SamAccountName</th>
+                <th>Description</th>
+                <th>Last Logon</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
 "@
 
-foreach ($u in $usuariosDescripcion) {
-    $fecha = if ($u.LastLogonDate) { $u.LastLogonDate.ToString("yyyy-MM-dd HH:mm") } else { "" }
-    $htmlDescripcion += "<tr><td>$($u.Name)</td><td>$($u.SamAccountName)</td><td>$($u.Description)</td><td>$fecha</td></tr>`r`n"
+# Generate rows for Sensitive Users
+$RowsTable2 = foreach ($User in $SensitiveUsers) {
+    # Format Date
+    $DateStr = if ($User.LastLogonDate) { $User.LastLogonDate.ToString("yyyy-MM-dd HH:mm") } else { "Never" }
+
+    # Determine Status Class and Text
+    $StatusClass = if ($User.Enabled) { "status-active" } else { "status-disabled" }
+    $StatusText  = if ($User.Enabled) { "Habilitada" } else { "Deshabilitada" }
+
+    "<tr>
+        <td>$($User.Name)</td>
+        <td>$($User.SamAccountName)</td>
+        <td>$($User.Description)</td>
+        <td>$DateStr</td>
+        <td class='$StatusClass'>$StatusText</td>
+    </tr>"
 }
 
-$htmlDescripcion += "</table>"
+$HtmlTable2 += ($RowsTable2 -join "`n") + "</tbody></table>"
 
-# ================================
-#   PIE DEL HTML
-# ================================
-$htmlFooter = @"
+# --- FOOTER ---
+$Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+$HtmlFooter = @"
+    <div class="footer">Generated on: $Timestamp</div>
 </body>
 </html>
 "@
 
-# ================================
-#   GENERAR ARCHIVO FINAL
-# ================================
-$htmlCompleto = $htmlHeader + $htmlInactivos + $htmlDescripcion + $htmlFooter
-$htmlCompleto | Out-File -FilePath $rutaSalida -Encoding UTF8
+# --- EXPORT ---
+Write-Host "Exporting to HTML..." -ForegroundColor Cyan
 
-Write-Host "Informe generado en: $rutaSalida"
+# Assemble final HTML content
+$FinalHtml = $HtmlHeader + $HtmlTable1 + $HtmlTable2 + $HtmlFooter
+
+# Write to file
+try {
+    $FinalHtml | Out-File -FilePath $OutputPath -Encoding UTF8 -Force
+    Write-Host "Success! Report saved to: $OutputPath" -ForegroundColor Green
+} catch {
+    Write-Error "Failed to save the report: $_"
+}
