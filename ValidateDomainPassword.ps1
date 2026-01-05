@@ -1,4 +1,7 @@
-﻿# Load the required .NET assembly
+# .SYNOPSIS
+# Script to validate user AD credentials 
+ 
+ # Load the required .NET assembly
 Add-Type -AssemblyName System.DirectoryServices.AccountManagement
 
 # Prompt for credentials
