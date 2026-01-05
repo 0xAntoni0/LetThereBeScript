@@ -1,0 +1,55 @@
+name: Update Script Inventory
+
+on:
+  push:
+    paths:
+      - '**.ps1'       # Trigger only when .ps1 files are changed
+    branches:
+      - main           # Change to 'master' if your repo is older
+
+permissions:
+  contents: write      # Required to push the json file back to the repo
+
+jobs:
+  build-inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Generate scripts.json from SYNOPSIS
+        shell: pwsh
+        run: |
+          $list = @()
+          $files = Get-ChildItem -Path . -Filter "*.ps1"
+          
+          foreach ($f in $files) {
+              $content = Get-Content $f.FullName -Raw
+              
+              # Default description if .SYNOPSIS is missing
+              $descText = "No description provided."
+              
+              # REGEX EXPLANATION:
+              # Looks for .SYNOPSIS followed by a newline
+              # Captures the text on the immediate next line
+              if ($content -match '\.SYNOPSIS\s*\r?\n\s*(?<desc>.+)') {
+                  $descText = $Matches['desc'].Trim()
+              }
+              
+              $list += @{
+                  filename = $f.Name
+                  description = $descText
+                  url_raw = "https://raw.githubusercontent.com/${{ github.repository }}/main/$($f.Name)"
+              }
+          }
+          
+          # Export to JSON
+          $list | ConvertTo-Json -Depth 2 | Out-File "scripts.json" -Encoding utf8
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name 'GitHub Action Bot'
+          git config --global user.email 'action@github.com'
+          git add scripts.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-update inventory from SYNOPSIS"
+          git push
