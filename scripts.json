@@ -1,0 +1,42 @@
+[
+  {
+    "url_raw": "https://raw.githubusercontent.com/0xAntoni0/LetThereBeScript/main/ADhealth.ps1",
+    "description": "Generates a detailed HTML Health Report for Active Directory and ADCS.",
+    "filename": "ADhealth.ps1"
+  },
+  {
+    "url_raw": "https://raw.githubusercontent.com/0xAntoni0/LetThereBeScript/main/Cifrado de unidad Bitlocker.ps1",
+    "description": "No description provided.",
+    "filename": "Cifrado de unidad Bitlocker.ps1"
+  },
+  {
+    "url_raw": "https://raw.githubusercontent.com/0xAntoni0/LetThereBeScript/main/Enable-SharedMailboxMessageCopy.ps1",
+    "description": "No description provided.",
+    "filename": "Enable-SharedMailboxMessageCopy.ps1"
+  },
+  {
+    "url_raw": "https://raw.githubusercontent.com/0xAntoni0/LetThereBeScript/main/Export-ADUserLastLogon.ps1",
+    "description": "No description provided.",
+    "filename": "Export-ADUserLastLogon.ps1"
+  },
+  {
+    "url_raw": "https://raw.githubusercontent.com/0xAntoni0/LetThereBeScript/main/Ms365Mailbox_stats.ps1",
+    "description": "Script to export MailBox stats with Corporate Aesthetic HTML Report.",
+    "filename": "Ms365Mailbox_stats.ps1"
+  },
+  {
+    "url_raw": "https://raw.githubusercontent.com/0xAntoni0/LetThereBeScript/main/Set_ImmutableID.ps1",
+    "description": "No description provided.",
+    "filename": "Set_ImmutableID.ps1"
+  },
+  {
+    "url_raw": "https://raw.githubusercontent.com/0xAntoni0/LetThereBeScript/main/TestSMTP.ps1",
+    "description": "No description provided.",
+    "filename": "TestSMTP.ps1"
+  },
+  {
+    "url_raw": "https://raw.githubusercontent.com/0xAntoni0/LetThereBeScript/main/ValidateDomainPassword.ps1",
+    "description": "Script para validar las contraseñas de los usuarios de dominio.",
+    "filename": "ValidateDomainPassword.ps1"
+  }
+]
