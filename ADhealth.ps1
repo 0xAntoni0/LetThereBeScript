@@ -1,6 +1,6 @@
 <#
     .SYNOPSIS
-    Generates a detailed HTML Health Report for Active Directory and ADCS.
+    Genera un HTML detallado de la salud del controlador de dominio, sus roles y replicación.
 
     .DESCRIPTION
     This script performs health checks on Domain Controllers including:
